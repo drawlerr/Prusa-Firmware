@@ -36,7 +36,10 @@ public:
   void getAbsFilename(char *t);
   void getDirName(char* name, uint8_t level);
   uint16_t getWorkDirDepth();
-  
+
+#ifdef LONG_FILENAME_HOST_SUPPORT
+  void printLongPath(char *path);
+#endif
 
   void ls(bool printLFN);
   void chdir(const char * relpath);

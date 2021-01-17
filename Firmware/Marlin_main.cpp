@@ -5912,6 +5912,29 @@ if(eSoundMode!=e_SOUND_MODE_SILENT)
       }
     } break;
 
+#ifdef LONG_FILENAME_HOST_SUPPORT
+    case 33:
+    {
+        starpos = (strchr(strchr_pointer + 4,'*'));
+
+        char* namestartpos = (strchr(strchr_pointer + 4,'!'));   //find ! to indicate filename string start.
+        if(namestartpos==NULL)
+        {
+            namestartpos=strchr_pointer + 4; //default name position, 4 letters after the M
+        }
+        else
+            namestartpos++; //to skip the '!'
+
+        if(starpos!=NULL)
+            *(starpos)='\0';
+
+        if (card.cardOK) {
+            card.printLongPath(namestartpos);
+        }
+        break;
+    }
+#endif
+
     /*!
 	### M928 - Start SD logging <a href="https://reprap.org/wiki/G-code#M928:_Start_SD_logging">M928: Start SD logging</a>
     #### Usage
