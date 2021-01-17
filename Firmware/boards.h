@@ -7,6 +7,7 @@
 #define BOARD_RAMBO_MINI_1_3    203  // Rambo-mini 1.3 - 203 (orig 302)
 
 #define BOARD_EINSY_1_0a        310  // EINSy 1.0a     - 310 (new)
+#define BOARD_EINSY_1_0_TS      311  // Thermistor-swapped EINSY 1.0a
 
 #define MB(board) (MOTHERBOARD==BOARD_##board)
 #define IS_RAMPS (MB(RAMPS_OLD) || MB(RAMPS_13_EFB) || MB(RAMPS_13_EEB) || MB(RAMPS_13_EFF) || MB(RAMPS_13_EEF))

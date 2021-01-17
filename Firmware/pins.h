@@ -21,6 +21,13 @@
 #include "pins_Einsy_1_0.h"
 #endif //MOTHERBOARD == BOARD_EINSY_1_0a
 
+
+#if MOTHERBOARD == BOARD_EINSY_1_0_TS // 2020-1-16 - thermistor-swapped einsy 1.0
+#include "pins_Einsy_1_0_ts.h"
+#undef MOTHERBOARD
+#define MOTHERBOARD BOARD_EINSY_1_0a
+#endif //MOTHERBOARD == BOARD_EINSY_1_0TS
+
 #ifndef KNOWN_BOARD
 #error Unknown MOTHERBOARD value in configuration.h
 #endif
