@@ -534,7 +534,8 @@ void dcode_8()
         - `3` - PINDA temperature
         - `4` - PWR voltage
         - `5` - Ambient temperature
-        - `6` - BED voltage
+        - `6` - IR voltage
+        - `7` - Bed voltage
     - `V` Value to be written as simulated
     */
 const char* dcode_9_ADC_name(uint8_t i)
@@ -547,9 +548,10 @@ const char* dcode_9_ADC_name(uint8_t i)
 	case 3: return PSTR("TEMP_PINDA");
 	case 4: return PSTR("VOLT_PWR");
 	case 5: return PSTR("TEMP_AMBIENT");
-	case 6: return PSTR("VOLT_BED");
+	case 6: return PSTR("VOLT_IR");
+	case 7: return PSTR("VOLT_BED");
+	default: return nullptr;
 	}
-	return 0;
 }
 
 #ifdef AMBIENT_THERMISTOR
@@ -569,7 +571,7 @@ uint16_t dcode_9_ADC_val(uint8_t i)
 	switch (i)
 	{
 	case 0: return current_temperature_raw[0];
-	case 1: return 0;
+	case 1: return current_temperature_raw[1];
 	case 2: return current_temperature_bed_raw;
 	case 3: return current_temperature_raw_pinda;
 #ifdef VOLT_PWR_PIN
@@ -578,8 +580,9 @@ uint16_t dcode_9_ADC_val(uint8_t i)
 #ifdef AMBIENT_THERMISTOR
 	case 5: return current_temperature_raw_ambient;
 #endif //AMBIENT_THERMISTOR
+    case 6: return current_voltage_raw_IR;
 #ifdef VOLT_BED_PIN
-	case 6: return current_voltage_raw_bed;
+	case 7: return current_voltage_raw_bed;
 #endif //VOLT_BED_PIN
 	}
 	return 0;
@@ -590,8 +593,9 @@ void dcode_9()
 	puts_P(PSTR("D9 - Read/Write ADC"));
 	if ((strchr_pointer[1+1] == '?') || (strchr_pointer[1+1] == 0))
 	{
-		for (uint8_t i = 0; i < ADC_CHAN_CNT; i++)
-			printf_P(PSTR("\tADC%d=%4d\t(%S)\n"), i, dcode_9_ADC_val(i) >> 4, dcode_9_ADC_name(i));
+		for (uint8_t i = 0; i < ADC_CHAN_CNT; i++) {
+            printf_P(PSTR("\tADC%d=%4d\t(%S)\n"), i, dcode_9_ADC_val(i) >> 4, dcode_9_ADC_name(i));
+        }
 	}
 	else
 	{
