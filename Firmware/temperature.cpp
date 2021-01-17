@@ -1674,7 +1674,8 @@ extern "C" {
 
 void adc_ready(void) //callback from adc when sampling finished
 {
-	current_temperature_raw[0] = adc_values[ADC_PIN_IDX(TEMP_0_PIN)]; //heater
+	current_temperature_raw[0] = adc_values[ADC_PIN_IDX(TEMP_0_PIN)]; //heater0
+    current_temperature_raw[1] = adc_values[ADC_PIN_IDX(TEMP_1_PIN)]; //heater1
 #ifdef PINDA_THERMISTOR
 	current_temperature_raw_pinda_fast = adc_values[ADC_PIN_IDX(TEMP_PINDA_PIN)];
 #endif //PINDA_THERMISTOR
