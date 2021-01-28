@@ -5911,19 +5911,6 @@ if(eSoundMode!=e_SOUND_MODE_SILENT)
         }
       }
     } break;
-    /*!
-    ### M33 - Get Long Path <a href="https://reprap.org/wiki/G-code#M33:_Get_the_long_name_for_an_SD_card_file_or_folder">M33: Get the long name for an SD card file or folder</a>
-    #### Usage
-
-        M33 [filename]
-    */
-    case 33:
-    {
-        char * fname = strchr_pointer + 4;
-        card.getfilename(0, fname);
-        SERIAL_PROTOCOLLN(card.longFilename[0] ? card.longFilename : fname);
-    }
-    break;
 
     /*!
 	### M928 - Start SD logging <a href="https://reprap.org/wiki/G-code#M928:_Start_SD_logging">M928: Start SD logging</a>
