@@ -11,4 +11,4 @@ services:
     volumes:
     - ${PWD}/..:/workdir
     working_dir: /workdir/Prusa-Firmware
-    entrypoint: ./build.sh
+    entrypoint: ./PF-build.sh
