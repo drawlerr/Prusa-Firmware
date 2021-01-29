@@ -49,7 +49,7 @@ Firmware/Doc
 /lang/text.sym
 /lang/textaddr.txt
 /build-env/
-/Firmware/Firmware.vcxproj
+/Firmware/Firmware.vcxproj*
 /Firmware/Configuration_prusa_bckp.h
 /Firmware/variants/printers.h
 .pio
@@ -57,3 +57,4 @@ Firmware/Doc
 cmake-build-*
 CMakeLists*.txt
 *.cbp
+Firmware/.vs/
