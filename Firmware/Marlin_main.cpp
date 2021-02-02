@@ -765,8 +765,16 @@ static void factory_reset(char level)
             // Force the "Follow calibration flow" message at the next boot up.
             calibration_status_store(CALIBRATION_STATUS_Z_CALIBRATION);
 			eeprom_write_byte((uint8_t*)EEPROM_WIZARD_ACTIVE, 1); //run wizard
+#ifndef DISABLE_FARM_MODE
 			farm_mode = false;
 			eeprom_update_byte((uint8_t*)EEPROM_FARM_MODE, farm_mode);
+#else
+            {
+                int farm_mode_tmp = 0;
+                eeprom_update_byte((uint8_t*)EEPROM_FARM_MODE, farm_mode_tmp);
+			}
+#endif
+            
 
             eeprom_update_dword((uint32_t *)EEPROM_TOTALTIME, 0);
             eeprom_update_dword((uint32_t *)EEPROM_FILAMENTUSED, 0);
@@ -1101,9 +1109,11 @@ void setup()
 	setup_killpin();
 	setup_powerhold();
 
+#ifndef DISABLE_FARM_MODE
 	farm_mode = eeprom_read_byte((uint8_t*)EEPROM_FARM_MODE); 
 	if (farm_mode == 0xFF) 
 		farm_mode = false; //if farm_mode has not been stored to eeprom yet and farm number is set to zero or EEPROM is fresh, deactivate farm mode
+#endif
 	if (farm_mode)
 	{
 		no_response = true; //we need confirmation by recieving PRUSA thx
@@ -1436,8 +1446,10 @@ void setup()
     enable_z();
 #endif
 
+#ifndef DISABLE_FARM_MODE
 	farm_mode = eeprom_read_byte((uint8_t*)EEPROM_FARM_MODE);
 	if (farm_mode == 0xFF) farm_mode = false; //if farm_mode has not been stored to eeprom yet and farm number is set to zero or EEPROM is fresh, deactivate farm mode
+#endif
 	if (farm_mode)
 	{
 		prusa_statistics(8);
@@ -2793,9 +2805,9 @@ static void gcode_G28(bool home_x_axis, long home_x_value, bool home_y_axis, lon
         if(homing_feedrate[Y_AXIS]<feedrate)
           feedrate = homing_feedrate[Y_AXIS];
         if (max_length(X_AXIS) > max_length(Y_AXIS)) {
-          feedrate *= sqrt(pow(max_length(Y_AXIS) / max_length(X_AXIS), 2) + 1);
+          feedrate *= sqrtf(powf(max_length(Y_AXIS) / max_length(X_AXIS), 2) + 1);
         } else {
-          feedrate *= sqrt(pow(max_length(X_AXIS) / max_length(Y_AXIS), 2) + 1);
+          feedrate *= sqrtf(powf(max_length(X_AXIS) / max_length(Y_AXIS), 2) + 1);
         }
         plan_buffer_line_destinationXYZE(feedrate/60);
         st_synchronize();
@@ -3425,12 +3437,12 @@ void gcode_M701()
 
 		lcd_setstatuspgm(_T(MSG_LOADING_FILAMENT));
 		current_position[E_AXIS] += 40;
-		plan_buffer_line_curposXYZE(400 / 60); //fast sequence
+		plan_buffer_line_curposXYZE(250 / 60); //fast sequence
 		st_synchronize();
 
         raise_z_above(MIN_Z_FOR_LOAD, false);
 		current_position[E_AXIS] += 30;
-		plan_buffer_line_curposXYZE(400 / 60); //fast sequence
+		plan_buffer_line_curposXYZE(250 / 35); //fast sequence
 		
 		load_filament_final_feed(); //slow sequence
 		st_synchronize();
@@ -5634,23 +5646,27 @@ if(eSoundMode!=e_SOUND_MODE_SILENT)
     See Internal Prusa commands.
     */
 	case 98:
+#ifndef DISABLE_FARM_MODE
 		farm_mode = 1;
 		PingTime = _millis();
 		eeprom_update_byte((unsigned char *)EEPROM_FARM_MODE, farm_mode);
 		SilentModeMenu = SILENT_MODE_OFF;
 		eeprom_update_byte((unsigned char *)EEPROM_SILENT, SilentModeMenu);
 		fCheckModeInit();                       // alternatively invoke printer reset
+#endif
 		break;
 
     /*! ### G99 - Deactivate farm mode <a href="https://reprap.org/wiki/G-code#G99:_Deactivate_farm_mode">G99: Deactivate farm mode</a>
  	Disables Prusa-specific Farm functions and g-code.
    */
 	case 99:
+#ifndef DISABLE_FARM_MODE
 		farm_mode = 0;
 		lcd_printer_connected();
 		eeprom_update_byte((unsigned char *)EEPROM_FARM_MODE, farm_mode);
 		lcd_update(2);
           fCheckModeInit();                       // alternatively invoke printer reset
+#endif
 		break;
 	default:
 		printf_P(PSTR("Unknown G code: %s \n"), cmdbuffer + bufindr + CMDHDRSIZE);
@@ -6371,7 +6387,7 @@ if(eSoundMode!=e_SOUND_MODE_SILENT)
 		for( j=0; j<=n; j++) {
 			sum = sum + (sample_set[j]-mean) * (sample_set[j]-mean);
 		}
-		sigma = sqrt( sum / (double (n+1)) );
+		sigma = sqrtf( sum / (double (n+1)) );
 
 		if (verbose_level > 1) {
 			SERIAL_PROTOCOL(n+1);
@@ -9502,7 +9518,7 @@ void mesh_plan_buffer_line(const float &x, const float &y, const float &z, const
             float len = abs(dx) + abs(dy);
             if (len > 0)
                 // Split to 3cm segments or shorter.
-                n_segments = int(ceil(len / 30.f));
+                n_segments = int(ceilf(len / 30.f));
         }
 
         if (n_segments > 1) {

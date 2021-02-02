@@ -5,12 +5,12 @@
 * Date: Dec. 2020
 */
 
-#include "MeatPack.h"
+#include "meatpack.h"
+#include "Marlin.h"
 
 #ifdef ENABLE_MEATPACK
 
 #include "language.h"
-#include "Marlin.h"
 
 //#define MP_DEBUG
 
@@ -80,7 +80,7 @@ uint8_t mp_char_out_count = 0;     // Stores number of characters to be read out
 #ifdef USE_LOOKUP_TABLE
 // The 15 most-common characters used in G-code, ~90-95% of all g-code uses these characters
 // NOT storing this with PROGMEM, given how frequently this table will be accessed.
-volatile uint8_t MeatPackLookupTbl[16] = {
+uint8_t MeatPackLookupTbl[16] = {
     '0',	// 0000
     '1',	// 0001
     '2',	// 0010
@@ -99,7 +99,7 @@ volatile uint8_t MeatPackLookupTbl[16] = {
     '\0' // never used, 0b1111 is used to indicate next 8-bits is a full character
 };
 #else
-inline uint8_t get_char(register uint8_t in) {
+uint8_t FORCE_INLINE get_char(register uint8_t in) {
     switch (in) {
     case 0b0000:
         return '0';
@@ -298,12 +298,6 @@ void FORCE_INLINE mp_handle_cmd(const MeatPack_Command c) {
 #ifdef MP_DEBUG
         SERIAL_ECHOLNPGM("[MPDBG] DISBL REC");
 #endif
-    } break;
-    case MPCommand_TogglePacking: {
-        mp_config ^= MPConfig_Active;
-#ifdef MP_DEBUG
-        SERIAL_ECHOLNPGM("[MPDBG] TGL REC");
-#endif        
     } break;
     case MPCommand_ResetAll: {
         mp_reset_state();
