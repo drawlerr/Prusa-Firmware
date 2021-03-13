@@ -126,11 +126,13 @@ static void lcd_settings_menu();
 static void lcd_calibration_menu();
 static void lcd_control_temperature_menu();
 static void lcd_settings_linearity_correction_menu_save();
+#ifndef DISABLE_FARM_MODE
 static void prusa_stat_printerstatus(int _status);
 static void prusa_stat_farm_number();
 static void prusa_stat_diameter();
 static void prusa_stat_temperatures();
 static void prusa_stat_printinfo();
+#endif
 static void lcd_menu_xyz_y_min();
 static void lcd_menu_xyz_skew();
 static void lcd_menu_xyz_offset();
@@ -3830,6 +3832,7 @@ void lcd_menu_show_sensors_state()                // NOT static due to using ins
 	}
 }
 
+#ifndef DISABLE_FARM_MODE
 void prusa_statistics_err(char c){
 	SERIAL_ECHOPGM("{[ERR:");
 	SERIAL_ECHO(c);
@@ -3843,6 +3846,8 @@ static void prusa_statistics_case0(uint8_t statnr){
 	prusa_stat_farm_number();
 	prusa_stat_printinfo();
 }
+#endif
+
 
 void prusa_statistics(int _message, uint8_t _fil_nr) {
 #ifndef DISABLE_FARM_MODE
@@ -3991,6 +3996,7 @@ void prusa_statistics(int _message, uint8_t _fil_nr) {
 #endif
 }
 
+#ifndef DISABLE_FARM_MODE
 static void prusa_stat_printerstatus(int _status)
 {
 	SERIAL_ECHOPGM("[PRN:");
@@ -4045,6 +4051,7 @@ static void prusa_stat_printinfo()
 	SERIAL_ECHO(']');
      prusa_stat_diameter();
 }
+#endif
 
 /*
 void lcd_pick_babystep(){
@@ -6215,6 +6222,17 @@ void unload_filament()
 
 	//		extr_unload2();
 
+    // Push through some filament to eliminate blobs
+    // If the system was sitting cold and is brought up to temp suddenly, without positive
+    // pressure to push some filament through the tip, when it retracts, the filament won't 
+    // have much to stick to in order to stretch thin, and the blob may get stuck on the way out.
+    static constexpr float sPressureFR = (120.f / 60.f);
+    current_position[E_AXIS] += 10.0f;
+    plan_buffer_line_curposXYZE(sPressureFR);
+    st_synchronize();
+    current_position[E_AXIS] += 0.75;
+    plan_buffer_line_curposXYZE(sPressureFR / 2.0f);
+    st_synchronize();
 	current_position[E_AXIS] -= 45;
 	plan_buffer_line_curposXYZE(5200 / 60);
 	st_synchronize();

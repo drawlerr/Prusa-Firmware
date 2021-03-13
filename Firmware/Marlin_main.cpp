@@ -50,6 +50,10 @@
 
 #include "macros.h"
 
+#ifdef __INTELLISENSE__
+#include "variants/1_75mm_MK3S-EINSy10a-E3Dv6full.h"
+#endif
+
 #ifdef ENABLE_AUTO_BED_LEVELING
 #include "vector_3.h"
   #ifdef AUTO_BED_LEVELING_GRID
@@ -737,6 +741,7 @@ static void factory_reset(char level)
 	lcd_clear();
 	Sound_MakeCustom(100,0,false);
 	switch (level) {
+
 	case 0: // Level 0: Language reset
 		lang_reset();
 		break;
@@ -755,12 +760,17 @@ static void factory_reset(char level)
 		lang_reset();
 		// Force the "Follow calibration flow" message at the next boot up.
 		calibration_status_store(CALIBRATION_STATUS_Z_CALIBRATION);
-		eeprom_write_byte((uint8_t*)EEPROM_WIZARD_ACTIVE, 2); //run wizard
+		eeprom_write_byte((uint8_t*)EEPROM_WIZARD_ACTIVE, 1); //run wizard
+
 #ifndef DISABLE_FARM_MODE
 		farm_mode = false;
 		eeprom_update_byte((uint8_t*)EEPROM_FARM_MODE, farm_mode);
+#else
+        {
+            int farm_mode_tmp = 0;
+            eeprom_update_byte((uint8_t*)EEPROM_FARM_MODE, farm_mode_tmp);
+        }
 #endif
-
 #ifdef FILAMENT_SENSOR
 		fsensor_enable();
 		fsensor_autoload_set(true);
@@ -1800,8 +1810,15 @@ void loop()
 {
 	KEEPALIVE_STATE(NOT_BUSY);
 
+    if (isPrintPaused && saved_printing_type == PRINTING_TYPE_USB) //keep believing that usb is being printed. Prevents accessing dangerous menus while pausing.
+    {
+        is_usb_printing = true;
+    }
 	if ((usb_printing_counter > 0) && ((_millis()-_usb_timer) > 1000))
 	{
+        // Reset stats at start of USB print
+        if (!is_usb_printing) 
+            failstats_reset_print();
 		is_usb_printing = true;
 		usb_printing_counter--;
 		_usb_timer = _millis();
@@ -1809,10 +1826,6 @@ void loop()
 	if (usb_printing_counter == 0)
 	{
 		is_usb_printing = false;
-	}
-    if (isPrintPaused && saved_printing_type == PRINTING_TYPE_USB) //keep believing that usb is being printed. Prevents accessing dangerous menus while pausing.
-	{
-		is_usb_printing = true;
 	}
     
 #ifdef FANCHECK
@@ -3328,6 +3341,9 @@ static void gcode_M600(bool automatic, float x_position, float y_position, float
     {
         current_position[E_AXIS] += FILAMENTCHANGE_RECFEED;
         plan_buffer_line_curposXYZE(FILAMENTCHANGE_EXFEED);
+
+        //finish moves
+        st_synchronize();
     }
 
     //Move XY back
