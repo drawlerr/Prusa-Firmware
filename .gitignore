@@ -58,3 +58,4 @@ cmake-build-*
 CMakeLists*.txt
 *.cbp
 Firmware/.vs/
+.env
