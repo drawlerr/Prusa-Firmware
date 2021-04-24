@@ -8,6 +8,7 @@ services:
       - GID=${GID}
       dockerfile: Dockerfile
     image: pf-builder
+    platform: linux/amd64
     volumes:
     - ${PWD}/..:/workdir
     working_dir: /workdir/Prusa-Firmware
